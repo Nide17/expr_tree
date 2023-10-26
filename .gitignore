@@ -1,0 +1,17 @@
+# # Ignore all
+*
+
+# # Unignore all with extensions
+!*.*
+
+# Unignore all dirs
+!*/
+
+/backup/
+/out/
+a04*
+/Assig*
+/.vscode/
+*vscode*
+clist*
+tmp.*
