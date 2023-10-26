@@ -175,14 +175,7 @@ double ET_evaluate(ExprTree tree)
 static size_t writeValueToBuffer(double number, char *buf, size_t buf_sz)
 {
   size_t length;
-
-  if (snprintf(buf, buf_sz, "%f", number) >= buf_sz)
-  {
-    buf[buf_sz - 2] = '$';
-    buf[buf_sz - 1] = '\0';
-    return buf_sz - 1;
-  }
-
+  
   if (fmod(number, 1.0) == 0.0)
   {
     length = snprintf(buf, buf_sz, "%.0f", number);
@@ -238,7 +231,6 @@ size_t ET_tree2string(ExprTree tree, char *buf, size_t buf_sz)
   }
   else
   {
-
     char leftBuffer[buf_sz / 2];
     size_t leftLength = ET_tree2string(tree->n.child[LEFT], leftBuffer, buf_sz / 2);
     if (tree->type == UNARY_NEGATE)
@@ -251,31 +243,37 @@ size_t ET_tree2string(ExprTree tree, char *buf, size_t buf_sz)
       char rightBuffer[buf_sz / 2];
       size_t rightLength = ET_tree2string(tree->n.child[RIGHT], rightBuffer, buf_sz / 2);
 
-      if (tree->n.child[LEFT] != NULL && tree->n.child[LEFT]->type != VALUE)
+      if (tree->n.child[LEFT]->type != VALUE)
       {
         char tempBuffer[buf_sz / 2];
         snprintf(tempBuffer, buf_sz / 2, "%s", leftBuffer);
-        printf("leftBuffer: %s\n", tempBuffer);
+        // printf("leftBuffer: %s\n", tempBuffer);
         strcpy(leftBuffer, tempBuffer);
         leftLength += 2;
       }
 
-      if (tree->n.child[RIGHT] != NULL && tree->n.child[RIGHT]->type != VALUE)
+      if (tree->n.child[RIGHT]->type != VALUE)
       {
         char tempBuffer[buf_sz / 2];
         snprintf(tempBuffer, buf_sz / 2, "%s", rightBuffer);
-        printf("rightBuffer: %s\n", tempBuffer);
+        // printf("rightBuffer: %s\n", tempBuffer);
         strcpy(rightBuffer, tempBuffer);
         rightLength += 2;
       }
 
       length = snprintf(buf, buf_sz, "(%s %c %s)", leftBuffer, ExprNodeType_to_char(tree->type), rightBuffer);
     }
+
+    // Add bounds checking
+    if (length >= buf_sz)
+    {
+      buf[buf_sz - 2] = '$';
+      buf[buf_sz - 1] = '\0';
+      return buf_sz - 1;
+    }
   }
 
   return length;
 }
 
-// EACH OPERATION IS WITHIN PARENTHESES - HANDLE THAT
-// TEST EVALUATE VALUES
 // TRUNCATION
