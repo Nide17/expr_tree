@@ -7,6 +7,8 @@
 # Unignore all dirs
 !*/
 
+!Makefile
+
 /backup/
 /out/
 a04*
