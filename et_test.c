@@ -279,7 +279,7 @@ int test_evaluate()
 // test_tree2string_once
 bool test_tree2string_once(ExprTree tree, const char *expected_str)
 {
-  char buf[16];
+  char buf[39];
   double result;
 
   ET_tree2string(tree, buf, sizeof(buf));
@@ -302,6 +302,10 @@ int test_tree2string()
 
   tree = ET_node(OP_POWER, ET_value(2), ET_value(3));
   test_assert(test_tree2string_once(tree, "(2 ^ 3)"));
+  ET_free(tree);
+
+  tree = ET_node(OP_DIV, ET_value(3), ET_value(0));
+  test_assert(test_tree2string_once(tree, "(3 / 0)"));
   ET_free(tree);
 
   // -0.5 (as a value)
@@ -373,7 +377,7 @@ int test_tree2string()
   ET_free(tree);
 
   tree = ET_node(OP_DIV, ET_node(OP_POWER, ET_value(2), ET_node(OP_MUL, ET_value(1.5), ET_value(2))), ET_node(OP_ADD, ET_value(-1.7), ET_node(OP_SUB, ET_value(6), ET_value(0.3))));
-  test_assert(test_tree2string_once(tree, "((2 ^ (1.5 * 2)) / (-1.7 + (6 - 0.3)))"));
+  test_assert(test_tree2string_once(tree, "((2 ^ (1.5 * 2)) / (-1.7 + (6 - 0.3))$"));
   ET_free(tree);
 
   return 1;

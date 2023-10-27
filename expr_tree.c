@@ -40,14 +40,11 @@ static char ExprNodeType_to_char(ExprNodeType ent)
 {
   switch (ent)
   {
-  case VALUE:
-    return 'V';
+  case OP_SUB:
   case UNARY_NEGATE:
     return '-';
   case OP_ADD:
     return '+';
-  case OP_SUB:
-    return '-';
   case OP_MUL:
     return '*';
   case OP_DIV:
@@ -106,6 +103,7 @@ int ET_count(ExprTree tree)
 
   return 1 + ET_count(tree->n.child[LEFT]) + ET_count(tree->n.child[RIGHT]);
 }
+
 // Documented in .h file
 int ET_depth(ExprTree tree)
 {
@@ -174,6 +172,7 @@ double ET_evaluate(ExprTree tree)
  */
 static size_t writeValueToBuffer(double number, char *buf, size_t buf_sz)
 {
+  // Handling the value
   size_t length;
   
   if (fmod(number, 1.0) == 0.0)
@@ -216,14 +215,16 @@ static size_t writeValueToBuffer(double number, char *buf, size_t buf_sz)
 
 size_t ET_tree2string(ExprTree tree, char *buf, size_t buf_sz)
 {
-  if (tree == NULL)
-  {
-    strncpy(buf, "Error: NULL tree", buf_sz - 1);
-    buf[buf_sz - 1] = '\0';
-    return strlen(buf);
-  }
+  assert(buf != NULL);
+  assert(buf_sz > 0);
+  assert(tree);
 
   size_t length = 0;
+  char leftBuffer[buf_sz / 2];
+  char rightBuffer[buf_sz / 2];
+
+  // Add a flag at the end of the string to indicate truncation
+  buf[buf_sz - 1] = '$';
 
   if (tree->type == VALUE)
   {
@@ -231,23 +232,18 @@ size_t ET_tree2string(ExprTree tree, char *buf, size_t buf_sz)
   }
   else
   {
-    char leftBuffer[buf_sz / 2];
     size_t leftLength = ET_tree2string(tree->n.child[LEFT], leftBuffer, buf_sz / 2);
-    if (tree->type == UNARY_NEGATE)
-    {
-      length = snprintf(buf, buf_sz, "(-%s)", leftBuffer);
-    }
 
+    if (tree->type == UNARY_NEGATE)
+      length = snprintf(buf, buf_sz, "(-%s)", leftBuffer);
     else
     {
-      char rightBuffer[buf_sz / 2];
       size_t rightLength = ET_tree2string(tree->n.child[RIGHT], rightBuffer, buf_sz / 2);
 
       if (tree->n.child[LEFT]->type != VALUE)
       {
         char tempBuffer[buf_sz / 2];
         snprintf(tempBuffer, buf_sz / 2, "%s", leftBuffer);
-        // printf("leftBuffer: %s\n", tempBuffer);
         strcpy(leftBuffer, tempBuffer);
         leftLength += 2;
       }
@@ -256,21 +252,21 @@ size_t ET_tree2string(ExprTree tree, char *buf, size_t buf_sz)
       {
         char tempBuffer[buf_sz / 2];
         snprintf(tempBuffer, buf_sz / 2, "%s", rightBuffer);
-        // printf("rightBuffer: %s\n", tempBuffer);
         strcpy(rightBuffer, tempBuffer);
         rightLength += 2;
       }
 
       length = snprintf(buf, buf_sz, "(%s %c %s)", leftBuffer, ExprNodeType_to_char(tree->type), rightBuffer);
     }
+  }
 
-    // Add bounds checking
-    if (length >= buf_sz)
-    {
-      buf[buf_sz - 2] = '$';
-      buf[buf_sz - 1] = '\0';
-      return buf_sz - 1;
-    }
+  // Truncation
+  if (length >= buf_sz)
+  {
+    length = buf_sz - 1;
+    // Add a flag at the end of the string to indicate truncation
+    buf[buf_sz - 2] = '$';
+    buf[buf_sz - 1] = '\0';
   }
 
   return length;
