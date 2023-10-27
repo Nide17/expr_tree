@@ -83,7 +83,7 @@ __KEYWORDS__
 
 __AUTHOR__
 
-howdy@sleepymoose.net (Howdy Pierce)
+Howdy Pierce
 
 __CONTRIBUTOR__
 
