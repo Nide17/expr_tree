@@ -1,4 +1,3 @@
-
 /*
  * expr_tree.c
  *
@@ -132,8 +131,6 @@ double ET_evaluate(ExprTree tree)
 
   switch (tree->type)
   {
-  case UNARY_NEGATE:
-    return -left;
   case OP_ADD:
     return left + right;
   case OP_SUB:
@@ -144,87 +141,39 @@ double ET_evaluate(ExprTree tree)
     return left / right;
   case OP_POWER:
     return pow(left, right);
+  case UNARY_NEGATE:
+    return -left;
   default:
     assert(0);
   }
 }
 
-/*
- * Convert an ExprTree into a printable ASCII string stored in buf
- *
- * Parameters:
- *   tree     The tree
- *   buf      The buffer
- *   buf_sz   Size of buffer, in bytes
- *
- * If it takes more characters to represent tree than are allowed in
- * buf, this function places as many characters as will fit into buf,
- * followed by a '$' character to indicate the result was truncated.
- * Buf will always be terminated with a \0 and in no case will this
- * function write characters beyond the end of buf.
- *
- * Returns: The number of characters written to buf, not counting the
- * \0 terminator.
- *
- *   The number of characters written to buf, not counting the '\0' terminator.
- *   If the string was truncated due to insufficient buffer space, the last
- *   character will be '$'.
- */
-static size_t writeValueToBuffer(double number, char *buf, size_t buf_sz)
+// Documented in .h file
+size_t writeValueToBuffer(double number, char *buf, size_t buf_sz)
 {
   // Handling the value
   size_t length;
-  
+
+  // if the number is an integer, we truncate the decimal part
   if (fmod(number, 1.0) == 0.0)
   {
     length = snprintf(buf, buf_sz, "%.0f", number);
   }
   else
   {
-    char temp[buf_sz];
-    snprintf(temp, buf_sz, "%f", number);
-
-    char *truncatePos = temp + strlen(temp) - 1;
-    while (*truncatePos == '0')
-    {
-      truncatePos--;
-    }
-    truncatePos[1] = '\0';
-
-    int count = 0;
-    for (char *ptr = temp; *ptr; ptr++)
-    {
-      if (*ptr == '.')
-      {
-        count = strlen(temp) - (ptr - temp) - 1;
-      }
-    }
-
-    if (count < 2)
-    {
-      length = snprintf(buf, buf_sz, "%.1f", number);
-    }
-    else
-    {
-      length = snprintf(buf, buf_sz, "%s", temp);
-    }
+    length = snprintf(buf, buf_sz, "%g", number);
   }
 
   return length;
 }
 
+// Documented in .h file
 size_t ET_tree2string(ExprTree tree, char *buf, size_t buf_sz)
 {
-  assert(buf != NULL);
-  assert(buf_sz > 0);
   assert(tree);
-
   size_t length = 0;
-  char leftBuffer[buf_sz / 2];
-  char rightBuffer[buf_sz / 2];
-
-  // Add a flag at the end of the string to indicate truncation
-  buf[buf_sz - 1] = '$';
+  char leftBuffer[buf_sz];
+  char rightBuffer[buf_sz];
 
   if (tree->type == VALUE)
   {
@@ -232,26 +181,26 @@ size_t ET_tree2string(ExprTree tree, char *buf, size_t buf_sz)
   }
   else
   {
-    size_t leftLength = ET_tree2string(tree->n.child[LEFT], leftBuffer, buf_sz / 2);
+    size_t leftLength = ET_tree2string(tree->n.child[LEFT], leftBuffer, buf_sz);
 
     if (tree->type == UNARY_NEGATE)
       length = snprintf(buf, buf_sz, "(-%s)", leftBuffer);
     else
     {
-      size_t rightLength = ET_tree2string(tree->n.child[RIGHT], rightBuffer, buf_sz / 2);
+      size_t rightLength = ET_tree2string(tree->n.child[RIGHT], rightBuffer, buf_sz);
 
       if (tree->n.child[LEFT]->type != VALUE)
       {
-        char tempBuffer[buf_sz / 2];
-        snprintf(tempBuffer, buf_sz / 2, "%s", leftBuffer);
+        char tempBuffer[buf_sz];
+        snprintf(tempBuffer, buf_sz, "%s", leftBuffer);
         strcpy(leftBuffer, tempBuffer);
         leftLength += 2;
       }
 
       if (tree->n.child[RIGHT]->type != VALUE)
       {
-        char tempBuffer[buf_sz / 2];
-        snprintf(tempBuffer, buf_sz / 2, "%s", rightBuffer);
+        char tempBuffer[buf_sz];
+        snprintf(tempBuffer, buf_sz, "%s", rightBuffer);
         strcpy(rightBuffer, tempBuffer);
         rightLength += 2;
       }
@@ -260,16 +209,19 @@ size_t ET_tree2string(ExprTree tree, char *buf, size_t buf_sz)
     }
   }
 
-  // Truncation
-  if (length >= buf_sz)
+  if (length >= buf_sz - 1)
   {
-    length = buf_sz - 1;
-    // Add a flag at the end of the string to indicate truncation
     buf[buf_sz - 2] = '$';
     buf[buf_sz - 1] = '\0';
   }
 
+  printf("length: %zu\n", length);
+  printf("buf_sz: %zu\n", buf_sz);
+  printf("buf content: %zu\n", strlen(buf));
   return length;
 }
 
 // TRUNCATION
+// LENGTH RETURNED
+// LENGTH OF BUFFER
+// LENGTH OF STRING

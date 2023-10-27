@@ -282,15 +282,20 @@ bool test_tree2string_once(ExprTree tree, const char *expected_str)
   char buf[39];
   double result;
 
-  ET_tree2string(tree, buf, sizeof(buf));
+  size_t length = ET_tree2string(tree, buf, sizeof(buf));
   result = ET_evaluate(tree);
-  printf("%s ==> %g\n", buf, result);
+  printf("%s ==> %g: length = %ld\n", buf, result, length);
   return strcmp(buf, expected_str) == 0;
 }
 
 int test_tree2string()
 {
   ExprTree tree = NULL;
+
+  // only one value of 1 char
+  tree = ET_value(1000000000000000000);
+  test_assert(test_tree2string_once(tree, "1000000000000000000"));
+  ET_free(tree);
 
   tree = ET_node(OP_ADD, ET_value(1), ET_value(3));
   test_assert(test_tree2string_once(tree, "(1 + 3)"));
