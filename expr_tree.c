@@ -114,6 +114,7 @@ int ET_depth(ExprTree tree)
 
   int left = ET_depth(tree->n.child[LEFT]);
   int right = ET_depth(tree->n.child[RIGHT]);
+
   return 1 + (left > right ? left : right);
 }
 
@@ -220,8 +221,3 @@ size_t ET_tree2string(ExprTree tree, char *buf, size_t buf_sz)
   printf("buf content: %zu\n", strlen(buf));
   return length;
 }
-
-// TRUNCATION
-// LENGTH RETURNED
-// LENGTH OF BUFFER
-// LENGTH OF STRING
