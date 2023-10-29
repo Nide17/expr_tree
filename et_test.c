@@ -115,7 +115,6 @@ int test_depth()
   ET_free(tree);
   test_assert(depth == 5);
 
-  // complex, edge cases and corner cases to test:
   // 2^(1.5 × 2) ÷ (−1.7 + (6 − 0.3))
   tree = ET_node(OP_DIV, ET_node(OP_POWER, ET_value(2), ET_node(OP_MUL, ET_value(1.5), ET_value(2))), ET_node(OP_ADD, ET_value(-1.7), ET_node(OP_SUB, ET_value(6), ET_value(0.3))));
   depth = ET_depth(tree);
@@ -165,7 +164,6 @@ int test_count()
   ET_free(tree);
   test_assert(count == 9);
 
-  // complex, edge cases and corner cases to test:
   // 2^(1.5 × 2) ÷ (−1.7 + (6 − 0.3))
   tree = ET_node(OP_DIV, ET_node(OP_POWER, ET_value(2), ET_node(OP_MUL, ET_value(1.5), ET_value(2))), ET_node(OP_ADD, ET_value(-1.7), ET_node(OP_SUB, ET_value(6), ET_value(0.3))));
   count = ET_count(tree);
@@ -254,7 +252,6 @@ int test_evaluate()
   test_assert(ET_evaluate(tree) == 5);
   ET_free(tree);
 
-  // other complex and corner cases to test:
   // 2^(1.5 × 2) ÷ (−1.7 + (6 − 0.3)) ==> 2
   tree = ET_node(OP_DIV, ET_node(OP_POWER, ET_value(2), ET_node(OP_MUL, ET_value(1.5), ET_value(2))), ET_node(OP_ADD, ET_value(-1.7), ET_node(OP_SUB, ET_value(6), ET_value(0.3))));
   test_assert(ET_evaluate(tree) == 2);
@@ -271,12 +268,15 @@ int test_evaluate()
 }
 
 /*
- * Tests the ET_tree2string function.
- *
- * Returns: 1 if all tests pass, 0 otherwise
- */
-
-// test_tree2string_once
+ * Helper function for test_tree2string that tests a single tree.
+ * 
+ * Parameters:
+ *  tree: the tree to test
+ *  expected_str: the expected string representation of the tree
+ * 
+ * Returns: 
+ *  true if the test passes, false otherwise 
+*/
 bool test_tree2string_once(ExprTree tree, const char *expected_str)
 {
   char buf[39];
@@ -287,6 +287,12 @@ bool test_tree2string_once(ExprTree tree, const char *expected_str)
   printf("%s ==> %g: length = %ld\n", buf, result, length);
   return strcmp(buf, expected_str) == 0;
 }
+
+/*
+ * Tests the ET_tree2string function.
+ *
+ * Returns: 1 if all tests pass, 0 otherwise
+ */
 
 int test_tree2string()
 {
@@ -357,7 +363,6 @@ int test_tree2string()
   test_assert(test_tree2string_once(tree, "((2 ^ 3) / (1.3 + 2.7))"));
   ET_free(tree);
 
-  // other complex and corner cases to test:
   tree = ET_node(OP_ADD, ET_value(-2), ET_value(3));
   tree = ET_node(OP_MUL, tree, ET_node(OP_DIV, ET_node(OP_SUB, ET_value(-4), ET_value(1)), ET_value(2)));
   test_assert(test_tree2string_once(tree, "((-2 + 3) * ((-4 - 1) / 2))"));
@@ -381,8 +386,14 @@ int test_tree2string()
   test_assert(test_tree2string_once(tree, "((2 + (-3 ^ 2)) * ((-4 + 1) / 2))"));
   ET_free(tree);
 
+  // ((2 ^ (1.5 * 2)) / (-1.7 + (6 - 0.3)))
   tree = ET_node(OP_DIV, ET_node(OP_POWER, ET_value(2), ET_node(OP_MUL, ET_value(1.5), ET_value(2))), ET_node(OP_ADD, ET_value(-1.7), ET_node(OP_SUB, ET_value(6), ET_value(0.3))));
   test_assert(test_tree2string_once(tree, "((2 ^ (1.5 * 2)) / (-1.7 + (6 - 0.3))$"));
+  ET_free(tree);
+
+  // (((2 + 1) ^ (1.5 * 2)) / (-1.7 + (6 - 0.3))
+  tree = ET_node(OP_DIV, ET_node(OP_POWER, ET_node(OP_ADD, ET_value(2), ET_value(1)), ET_node(OP_MUL, ET_value(1.5), ET_value(2))), ET_node(OP_ADD, ET_value(-1.7), ET_node(OP_SUB, ET_value(6), ET_value(0.3))));
+  test_assert(test_tree2string_once(tree, "(((2 + 1) ^ (1.5 * 2)) / (-1.7 + (6 -$"));
   ET_free(tree);
 
   return 1;

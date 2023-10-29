@@ -1,14 +1,14 @@
 /*
  * expr_tree.h
- * 
+ *
  * A dynamically allocated tree to handle arbitrary expressions
  *
  * Author: Howdy Pierce <howdy@sleepymoose.net>
+ * Contributor: Niyomwungeri Parmenide Ishimwe <parmenin@andrew.cmu.edu>
  */
 
 #ifndef _EXPR_TREE_H_
 #define _EXPR_TREE_H_
-
 
 #include <stdio.h>
 #include <stdlib.h>

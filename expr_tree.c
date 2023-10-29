@@ -157,13 +157,10 @@ size_t writeValueToBuffer(double number, char *buf, size_t buf_sz)
 
   // if the number is an integer, we truncate the decimal part
   if (fmod(number, 1.0) == 0.0)
-  {
     length = snprintf(buf, buf_sz, "%.0f", number);
-  }
+    
   else
-  {
     length = snprintf(buf, buf_sz, "%g", number);
-  }
 
   return length;
 }
@@ -171,25 +168,32 @@ size_t writeValueToBuffer(double number, char *buf, size_t buf_sz)
 // Documented in .h file
 size_t ET_tree2string(ExprTree tree, char *buf, size_t buf_sz)
 {
-  assert(tree);
+  if (tree == NULL || buf == NULL || buf_sz == 0)
+    return 0;
+
   size_t length = 0;
   char leftBuffer[buf_sz];
   char rightBuffer[buf_sz];
 
+  // write to buffer if it is a value
   if (tree->type == VALUE)
-  {
     length = writeValueToBuffer(tree->n.value, buf, buf_sz);
-  }
+
   else
   {
+    // process the left child
     size_t leftLength = ET_tree2string(tree->n.child[LEFT], leftBuffer, buf_sz);
 
+    // print to the buffer if unary negate
     if (tree->type == UNARY_NEGATE)
       length = snprintf(buf, buf_sz, "(-%s)", leftBuffer);
+
     else
     {
+      // process the right child
       size_t rightLength = ET_tree2string(tree->n.child[RIGHT], rightBuffer, buf_sz);
 
+      // print to the buffer both children
       if (tree->n.child[LEFT]->type != VALUE)
       {
         char tempBuffer[buf_sz];
@@ -206,18 +210,19 @@ size_t ET_tree2string(ExprTree tree, char *buf, size_t buf_sz)
         rightLength += 2;
       }
 
+      // finally print to the buffer the whole expression
       length = snprintf(buf, buf_sz, "(%s %c %s)", leftBuffer, ExprNodeType_to_char(tree->type), rightBuffer);
     }
   }
 
+  // truncate the string if it is too long for the buffer
   if (length >= buf_sz - 1)
   {
     buf[buf_sz - 2] = '$';
     buf[buf_sz - 1] = '\0';
+    return buf_sz - 1;
   }
 
-  printf("length: %zu\n", length);
-  printf("buf_sz: %zu\n", buf_sz);
-  printf("buf content: %zu\n", strlen(buf));
+  buf[length] = '\0';
   return length;
 }
