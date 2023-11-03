@@ -38,9 +38,6 @@ Returns the maximum depth of the tree.
 ```double ET_evaluate(ExprTree tree)```
 Evaluates an expression tree and returns the computed value.
 
-```size_t writeValueToBuffer(double number, char *buf, size_t buf_sz)```
-A helper function to write a double value to a buffer.
-
 ```size_t ET_tree2string(ExprTree tree, char *buf, size_t buf_sz)```
 Converts an expression tree into a printable ASCII string stored in a buffer.
 

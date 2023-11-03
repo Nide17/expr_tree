@@ -106,20 +106,6 @@ int ET_depth(ExprTree tree);
 double ET_evaluate(ExprTree tree);
 
 /*
-* Helper function for ET_tree2string function to write a value to a buffer
-* Write a double value to a buffer
-* 
-* Parameters:
-*   number   The number to write
-*   buf      The buffer
-*   buf_sz   Size of buffer, in bytes
-*
-* Returns: The number of characters written to buf, not counting the
-* \0 terminator.
-*/
-size_t writeValueToBuffer(double number, char *buf, size_t buf_sz);
-
-/*
  * Convert an ExprTree into a printable ASCII string stored in buf
  * Uses a recursive approach, converting the child nodes to strings first
  * and then formatting the parent node.

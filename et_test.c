@@ -279,7 +279,7 @@ int test_evaluate()
 */
 bool test_tree2string_once(ExprTree tree, const char *expected_str)
 {
-  char buf[39];
+  char buf[38];
   double result;
 
   size_t length = ET_tree2string(tree, buf, sizeof(buf));
@@ -299,8 +299,12 @@ int test_tree2string()
   ExprTree tree = NULL;
 
   // only one value of 1 char
+  tree = ET_value(2);
+  test_assert(test_tree2string_once(tree, "2"));
+  ET_free(tree);
+
   tree = ET_value(1000000000000000000);
-  test_assert(test_tree2string_once(tree, "1000000000000000000"));
+  test_assert(test_tree2string_once(tree, "1e+18"));
   ET_free(tree);
 
   tree = ET_node(OP_ADD, ET_value(1), ET_value(3));
@@ -386,14 +390,14 @@ int test_tree2string()
   test_assert(test_tree2string_once(tree, "((2 + (-3 ^ 2)) * ((-4 + 1) / 2))"));
   ET_free(tree);
 
-  // ((2 ^ (1.5 * 2)) / (-1.7 + (6 - 0.3)))
-  tree = ET_node(OP_DIV, ET_node(OP_POWER, ET_value(2), ET_node(OP_MUL, ET_value(1.5), ET_value(2))), ET_node(OP_ADD, ET_value(-1.7), ET_node(OP_SUB, ET_value(6), ET_value(0.3))));
-  test_assert(test_tree2string_once(tree, "((2 ^ (1.5 * 2)) / (-1.7 + (6 - 0.3))$"));
-  ET_free(tree);
-
   // (((2 + 1) ^ (1.5 * 2)) / (-1.7 + (6 - 0.3))
   tree = ET_node(OP_DIV, ET_node(OP_POWER, ET_node(OP_ADD, ET_value(2), ET_value(1)), ET_node(OP_MUL, ET_value(1.5), ET_value(2))), ET_node(OP_ADD, ET_value(-1.7), ET_node(OP_SUB, ET_value(6), ET_value(0.3))));
-  test_assert(test_tree2string_once(tree, "(((2 + 1) ^ (1.5 * 2)) / (-1.7 + (6 -$"));
+  test_assert(test_tree2string_once(tree, "(((2 + 1) ^ (1.5 * 2)) / (-1.7 + (6 $"));
+  ET_free(tree);
+
+  // ((2 ^ (1.5 * 2)) / (-1.7 + (6 - 0.3)))
+  tree = ET_node(OP_DIV, ET_node(OP_POWER, ET_value(2), ET_node(OP_MUL, ET_value(1.5), ET_value(2))), ET_node(OP_ADD, ET_value(-1.7), ET_node(OP_SUB, ET_value(6), ET_value(0.3))));
+  test_assert(test_tree2string_once(tree, "((2 ^ (1.5 * 2)) / (-1.7 + (6 - 0.3)$"));
   ET_free(tree);
 
   return 1;
